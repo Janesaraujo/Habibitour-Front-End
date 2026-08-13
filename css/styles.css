@@ -1,0 +1,149 @@
+* { font-family: 'Plus Jakarta Sans', sans-serif; }
+html, body { height: 100%; margin: 0; overflow: hidden; background: #0B1120; }
+
+/* ===== Background layers ===== */
+/* Safety "floor": ensures it NEVER goes pure black, even if an
+   image fails to load. Always sits beneath everything. */
+#bgFallback {
+  position: absolute; inset: 0; z-index: 0;
+  background: radial-gradient(120% 100% at 15% 25%, #16233d 0%, #0B1120 60%),
+              linear-gradient(120deg, #3a2f1c 0%, #0B1120 55%);
+}
+#bgA, #bgB {
+  position: absolute; inset: 0; z-index: 1;
+  background-size: cover;
+  background-position: center;
+}
+#bgB { opacity: 0; }
+
+.hero-overlay {
+  position: absolute; inset: 0; z-index: 2;
+  background: linear-gradient(90deg,
+    rgba(11,17,32,0.92) 0%,
+    rgba(11,17,32,0.75) 22%,
+    rgba(11,17,32,0.35) 48%,
+    rgba(11,17,32,0.05) 68%,
+    rgba(11,17,32,0.25) 100%);
+}
+.hero-overlay-bottom {
+  position: absolute; inset: 0; z-index: 2;
+  background: linear-gradient(0deg, rgba(11,17,32,0.55) 0%, rgba(11,17,32,0) 30%);
+}
+
+/* Title: clip-path creates the cinematic reveal (film-cut style).
+   The name is always split into exactly two lines — first word on
+   top, the rest below (see #titleLine1/#titleLine2) — instead of
+   letting the browser wrap it wherever it happens to fit. Each line
+   is `white-space: nowrap` on its own; fitTitleFont() in script.js
+   shrinks the shared font-size just enough so the widest of
+   the two lines never overflows. */
+#title { clip-path: inset(0% 0 0 0); }
+.title-line { display: block; white-space: nowrap; }
+
+/* Fixed description height: reserves room for the longest of the 4
+   destination descriptions (~3 lines at these breakpoints), so
+   shorter descriptions don't shrink the block and move the Explore
+   button up/down between destinations. */
+#desc { min-height: 4.2em; }
+
+/* =====================================================================
+   LIQUID GLASS — the liquid-glass effect used on the navbar, control
+   buttons and cards. Semi-transparent background + blur of whatever is
+   behind it + ultra-thin light border to simulate the "glass" thickness.
+   ===================================================================== */
+.liquid-glass {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+.liquid-glass-soft {
+  background: rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+/* Lighter liquid glass — used on the name label inside each card,
+   so the background photo stays more visible behind the text. */
+.liquid-glass-card {
+  background: rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(8px) saturate(140%);
+  -webkit-backdrop-filter: blur(8px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* Floating card with subtle perspective, like the inspiration.
+   Hover effect: the whole card grows + lifts + gets a deeper, softer
+   shadow (Hover.css "Grow Shadow" style, intensified), so it reads
+   as hovering above the track rather than the ground. A slower,
+   eased-out transition keeps the motion itself feeling smooth even
+   though the size change is now more noticeable. `z-index` on hover
+   makes sure the enlarged card visually sits above its neighbors. */
+.dest-card {
+  transform: perspective(900px) rotateY(-4deg) translateY(0) scale(1);
+  transition: box-shadow .45s cubic-bezier(.22,.61,.36,1),
+              transform .45s cubic-bezier(.22,.61,.36,1),
+              opacity .35s ease;
+  background-color: rgba(255,255,255,0.05); /* placeholder while the image loads */
+}
+.dest-card:hover {
+  box-shadow: 0 45px 90px -16px rgba(0,0,0,0.7);
+  transform: perspective(900px) rotateY(-1deg) translateY(-14px) scale(1.07);
+  z-index: 5;
+}
+/* While one card in the track is hovered, the OTHER cards recede and
+   dim slightly — reinforces that the hovered one is "up front". */
+#cardTrack:has(.dest-card:hover) .dest-card:not(:hover) {
+  transform: perspective(900px) rotateY(-4deg) translateY(0) scale(0.96);
+  opacity: 0.7;
+}
+
+/* Rating indicator (dots) */
+.dot { width: 5px; height: 5px; border-radius: 999px; background: rgba(255,255,255,0.4); }
+.dot.filled { background: #F3EFE6; }
+
+/* Circular arrow button (now with liquid glass) */
+.arrow-btn {
+  width: 46px; height: 46px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 999px;
+  color: #F3EFE6;
+  transition: background .25s ease, transform .2s ease;
+}
+.arrow-btn:hover { background: rgba(255,255,255,0.16); transform: scale(1.06); }
+
+/* Side numeric pagination — minimalist, no extra text */
+.page-num {
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: rgba(243, 239, 230, 0.35);
+  transition: color .3s ease, transform .3s ease;
+  cursor: pointer;
+}
+.page-num.active {
+  color: #D9B26F;
+  font-weight: 700;
+  transform: scale(1.15);
+}
+
+a:focus-visible, button:focus-visible {
+  outline: 2px solid #D9B26F;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+/* ===== ~1.4x scale on large screens (2xl, 1536px+) =====
+   Gives the hero the same visual "presence" as a 150% browser zoom,
+   without relying on the user zooming manually. Covers the elements
+   that use plain CSS (can't use Tailwind's 2xl: prefix on them,
+   since they aren't utility classes). */
+@media (min-width: 1536px) {
+  .page-num { font-size: 15px; }
+  .dot { width: 7px; height: 7px; }
+  .arrow-btn { width: 64px; height: 64px; }
+}

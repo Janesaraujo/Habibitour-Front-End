@@ -27,9 +27,9 @@ A cinematic, single-page travel showcase for Dubai's landmark destinations — *
 
 Built from this Figma Community file, which contains the original design and assets:
 
-[![Figma design cover](imagens/figma-cover.jpg)](https://www.figma.com/community/file/1384542229391733447/local-turistico)
+[![Figma design cover](assets/figma-cover.jpg)](https://www.figma.com/community/file/1384542229391733447/local-turistico)
 
-<!-- TODO: swap imagens/figma-cover.jpg for the real thumbnail once you export it from Figma -->
+<!-- TODO: swap assets/figma-cover.jpg for the real thumbnail once you export it from Figma -->
 
 ## 🎬 Beyond the Reference
 
@@ -55,8 +55,8 @@ Static front-end project, no build tools:
 
 - **HTML5** — semantic structure (`nav`, `section`, `button`)
 - **Tailwind CSS** (via CDN) — utility-first styling with a custom theme (`sand`, `dune`, `pearl` colors)
-- **Custom CSS** — liquid-glass effects, background layering/crossfade, clip-path title reveal
-- **JavaScript (vanilla)** — slider logic, DOM updates, navigation state
+- **Custom CSS** ([css/styles.css](css/styles.css)) — liquid-glass effects, background layering/crossfade, clip-path title reveal
+- **JavaScript (vanilla)** ([js/script.js](js/script.js)) — slider logic, DOM updates, navigation state
 - **GSAP** — timeline-based entrance sequence and per-navigation animations
 - **Google Fonts** — [Plus Jakarta Sans](https://fonts.google.com/specimen/Plus+Jakarta+Sans), loaded via `<link>` with `preconnect` for faster loading
 
@@ -64,7 +64,7 @@ Static front-end project, no build tools:
 
 ```
 .
-├── imagens/
+├── assets/
 │   ├── burj.jpg          # Burj Khalifa background/card image
 │   ├── deserto.jpg       # Dubai Desert background/card image
 │   ├── marina.jpg        # Dubai Marina background/card image
@@ -72,7 +72,12 @@ Static front-end project, no build tools:
 │   ├── figma-cover.jpg   # Figma design reference thumbnail
 │   ├── preview.gif       # README preview — looping screen recording
 │   └── preview.mp4       # source recording preview.gif was generated from
-├── index.html          # markup, styles and script (single-file app)
+├── css/
+│   └── styles.css        # all custom CSS (Tailwind utilities stay inline in index.html)
+├── js/
+│   ├── script.js          # destination data, slider/navigation logic, animations
+│   └── tailwind.config.js # Tailwind theme (colors) — loads right after the CDN script
+├── index.html             # markup only
 ├── LICENSE
 └── README.md
 ```
@@ -96,7 +101,7 @@ Since this is a static project (plain HTML + Tailwind via CDN), just open `index
 
 🔗 **Live preview:** _coming soon (deploy in progress)_
 
-![Habibi Tour preview](imagens/preview.gif)
+![Habibi Tour preview](assets/preview.gif)
 
 ## 👤 Author & 📄 License
 
@@ -105,4 +110,3 @@ Developed by **Janes Araujo**
 - GitHub: [@Janesaraujo](https://github.com/Janesaraujo)
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-# Habibitour-Front-End
