@@ -1,16 +1,3 @@
-/* =====================================================================
-   DESTINATION DATA
-   Order: 1) Palm Jumeirah  2) Dubai Marina  3) Dubai Desert  4) Burj Khalifa
-
-   LOCAL IMAGES: point to the "assets/" folder at the project root,
-   next to this index.html. Place the files using these exact names:
-     assets/palm.jpg
-     assets/marina.jpg
-     assets/deserto.jpg
-     assets/burj.jpg
-   Each file is used both as the full-screen background and the card
-   thumbnail (same image, shown at different sizes via CSS).
-   ===================================================================== */
 const destinations = [
   {
     country: "United Arab Emirates",
@@ -48,39 +35,26 @@ const destinations = [
 
 gsap.registerPlugin(SplitText);
 
-const CARD_SLOTS = 3;     // fixed number of visible cards in the queue
-let current = 0;          // active destination index
-let isAnimating = false;  // lock to prevent simultaneous clicks
+const CARD_SLOTS = 3;  
+let current = 0;          
+let isAnimating = false;  
 
 const $ = (id) => document.getElementById(id);
 const bgA = $("bgA"), bgB = $("bgB"), track = $("cardTrack");
-let bgToggle = true; // toggles which background layer is "on top" during the crossfade
+let bgToggle = true; 
 
-/* =====================================================================
-   PRELOADING — ensures that by the time the arrows are clicked, the
-   images are already in the browser cache (no flash / no waiting).
-   ===================================================================== */
 function preloadImages() {
   destinations.forEach((d) => {
     new Image().src = d.bg;
     new Image().src = d.card;
   });
 }
-
-/* Returns the indexes of the destinations that should occupy the card
-   slots, starting from the destination right after the active one. */
 function queueOrder(activeIndex) {
   const order = [];
   for (let i = 1; i <= CARD_SLOTS; i++) order.push((activeIndex + i) % destinations.length);
   return order;
 }
 
-/* =====================================================================
-   CREATING THE 3 CARD SLOTS — runs ONCE.
-   After that, the slots are never recreated: only their inner content
-   changes. Each card's footer is a liquid-glass panel (backdrop-blur)
-   over the photo itself, keeping the effect clearly visible.
-   ===================================================================== */
 function buildCardSlots() {
   track.innerHTML = "";
   for (let slot = 0; slot < CARD_SLOTS; slot++) {
@@ -112,8 +86,7 @@ function buildCardSlots() {
   }
 }
 
-/* Fills a card slot with a destination's data (no animation — used on
-   initial load and internally by the smooth swap). */
+
 function fillCardSlot(slot, destIndex) {
   const dest = destinations[destIndex];
   const card = $(`card-${slot}`);
@@ -126,8 +99,6 @@ function fillCardSlot(slot, destIndex) {
   ).join("");
 }
 
-/* Swaps every slot's content smoothly (fade + slight shift), without
-   ever removing or recreating the DOM elements. */
 function updateCardSlotsSmooth() {
   const order = queueOrder(current);
   const slots = Array.from({ length: CARD_SLOTS }, (_, i) => $(`card-${i}`));
@@ -144,11 +115,6 @@ function updateCardSlotsSmooth() {
         { opacity: 0, x: 14 },
         {
           opacity: 1, x: 0, duration: 0.4, ease: "power2.out", stagger: 0.06,
-          // GSAP would otherwise leave "opacity"/"transform" as an inline
-          // style on each card forever — inline styles beat any CSS
-          // selector, including :hover, so without this the Grow Shadow
-          // hover (and the sibling recede/dim) would silently stop
-          // working after the very first navigation.
           onComplete: () => gsap.set(slots, { clearProps: "opacity,transform" }),
         }
       );
@@ -156,10 +122,6 @@ function updateCardSlotsSmooth() {
   });
 }
 
-/* =====================================================================
-   SIDE PAGINATION — numbers only (01, 02, 03, 04), no extra text.
-   Created once; only the "active" class is swapped on each navigation.
-   ===================================================================== */
 function buildPageIndicator() {
   const wrap = $("pageIndicator");
   wrap.innerHTML = "";
@@ -179,40 +141,24 @@ function updatePageIndicator() {
   });
 }
 
-/* =====================================================================
-   TEXT / COUNTERS
-   ===================================================================== */
+
 function updateMeta() {
   $("counterLabel").textContent = `${String(current + 1).padStart(2, "0")} / ${String(destinations.length).padStart(2, "0")}`;
   updatePageIndicator();
 }
 
-/* =====================================================================
-   TITLE — always exactly two lines: the destination's first word on
-   #titleLine1, every remaining word on #titleLine2 (all 4 current
-   destination names have exactly two words, so this is a clean 1:1
-   split — a name with 3+ words would put all the extras on line 2).
-   This replaces relying on the browser's natural text wrap, which
-   used to break at whatever word happened to fit.
-   ===================================================================== */
+
 function setTitleLines(name) {
   const [first, ...rest] = name.split(" ");
   $("titleLine1").textContent = first;
   $("titleLine2").textContent = rest.join(" ");
 }
 
-/* Shrinks the title's shared font-size just enough that the WIDER of
-   the two fixed lines fits the text column — long single words (e.g.
-   on narrow screens) get scaled down instead of overflowing. Must run
-   AFTER setTitleLines(), and BEFORE any SplitText split of the title
-   (so the split measures the final size). */
+
 function fitTitleFont() {
   const el = $("title");
   el.style.fontSize = ""; // reset to the CSS default (per-breakpoint clamp) first
 
-  // clientWidth INCLUDES the parent's own padding, so the space actually
-  // available to a child is clientWidth minus that padding — not
-  // clientWidth itself.
   const parent = el.parentElement;
   const parentStyle = getComputedStyle(parent);
   const maxWidth = parent.clientWidth
@@ -226,7 +172,7 @@ function fitTitleFont() {
   }
 }
 
-/* Quick fade-out of the current text + clip-path reveal of the new one */
+
 function swapText(dest) {
   const tl = gsap.timeline();
   tl.to(["#eyebrow", "#title", "#desc"], { opacity: 0, y: -14, duration: 0.25, ease: "power2.in" })
@@ -243,21 +189,6 @@ function swapText(dest) {
   return tl;
 }
 
-/* =====================================================================
-   ROLLING TEXT — GSAP SplitText "rolling text" effect (based on
-   https://demos.gsap.com/demo/rolling-text/), used ONLY when navigating
-   via the prev/next arrows. The outgoing text rolls upward and out of
-   an overflow-hidden mask, then the incoming text rolls upward into
-   place, like a cinema marquee / odometer.
-
-   `mask: type` makes SplitText auto-wrap each piece in an
-   overflow-hidden span, which is what makes the "roll" read as a
-   reveal instead of a plain slide.
-   ===================================================================== */
-
-/* Rolls one element from its current text to `newText`, split into
-   "lines" — used for the description, a full sentence where rolling
-   whole lines keeps it legible instead of turning into visual soup. */
 function rollTextTo(el, newText) {
   const outSplit = new SplitText(el, { type: "lines", mask: "lines" });
 
@@ -285,10 +216,7 @@ function rollTextTo(el, newText) {
   });
 }
 
-/* Same roll, but for the two fixed title lines together: both lines
-   roll out, BOTH get their new word(s) set and the shared font-size
-   is re-fit in one shot (so line 1 and line 2 never briefly disagree
-   on size), then both roll in together. */
+
 function rollTitleTo(newName) {
   const line1 = $("titleLine1"), line2 = $("titleLine2");
   const outSplit1 = new SplitText(line1, { type: "lines", mask: "lines" });
@@ -321,8 +249,7 @@ function rollTitleTo(newName) {
   });
 }
 
-/* Arrow-only text swap: eyebrow keeps its existing fade, title and
-   description roll (by line) at the same time. */
+
 function rollTextSwap(dest) {
   const tl = gsap.timeline();
   tl.to("#eyebrow", { opacity: 0, y: -14, duration: 0.25, ease: "power2.in" })
@@ -335,10 +262,7 @@ function rollTextSwap(dest) {
   return tl;
 }
 
-/* =====================================================================
-   BACKGROUND — crossfade between the active destination's photo and
-   the next one
-   ===================================================================== */
+
 function crossfadeBackground(dest) {
   const incoming = bgToggle ? bgB : bgA;
   const outgoing = bgToggle ? bgA : bgB;
@@ -351,14 +275,7 @@ function crossfadeBackground(dest) {
   gsap.to(outgoing, { opacity: 0, duration: 0.9, ease: "power1.out" });
 }
 
-/* =====================================================================
-   NAVIGATION — used by the arrows, the pagination numbers and clicking
-   on any card.
 
-   `viaArrow` is only true when triggered by the prev/next buttons: in
-   that case the title/description use the rolling-text effect instead
-   of the regular clip-path/fade swap. Cards and pagination numbers
-   keep the original transition. */
 function goToDestination(index, { viaArrow = false } = {}) {
   if (isAnimating || index === current) return;
   isAnimating = true;
@@ -385,9 +302,6 @@ function goPrev() { goToDestination((current - 1 + destinations.length) % destin
 $("prevBtn").addEventListener("click", goPrev);
 $("nextBtn").addEventListener("click", goNext);
 
-/* =====================================================================
-   PAGE ENTRANCE SEQUENCE (first load)
-   ===================================================================== */
 window.addEventListener("DOMContentLoaded", () => {
   preloadImages();
 
@@ -395,16 +309,15 @@ window.addEventListener("DOMContentLoaded", () => {
   const first = destinations[current];
   bgA.style.backgroundImage = `url('${first.bg}')`;
 
-  // text / counters / pagination
+
   buildPageIndicator();
   updateMeta();
 
-  // cards: create the 3 fixed slots and fill them with the initial content
+
   buildCardSlots();
   queueOrder(current).forEach((destIndex, slot) => fillCardSlot(slot, destIndex));
 
-  // title: fit the (already in the HTML) initial name to one line,
-  // then start it hidden by the clip-path for the reveal below
+
   fitTitleFont();
   gsap.set("#title", { clipPath: "inset(100% 0 0 0)" });
 
@@ -421,9 +334,7 @@ window.addEventListener("DOMContentLoaded", () => {
       { x: 120, opacity: 0 },
       {
         x: 0, opacity: 1, duration: 0.9, stagger: 0.12, ease: "back.out(1.5)",
-        // same reason as in updateCardSlotsSmooth(): without this, the
-        // inline style GSAP leaves behind would permanently block the
-        // CSS :hover (Grow Shadow) and sibling-recede effects.
+  
         onComplete: () => gsap.set("#cardTrack .dest-card", { clearProps: "opacity,transform" }),
       },
       0.5
@@ -431,6 +342,5 @@ window.addEventListener("DOMContentLoaded", () => {
     .fromTo("#hero .absolute.bottom-9", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.6 }, 1.1);
 });
 
-// re-fit the title on breakpoint/orientation changes (its column
-// width and the clamp() font size both depend on viewport width)
+
 window.addEventListener("resize", fitTitleFont);
