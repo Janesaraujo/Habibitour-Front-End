@@ -122,6 +122,42 @@ function updateCardSlotsSmooth() {
   });
 }
 
+/* =====================================================================
+   MOBILE "ACTIVE CARD" — touch devices have no real :hover, so on the
+   swipeable mobile card row we fake it: whichever card is currently
+   centered in the (horizontally-scrolling) track gets `.is-active`,
+   the exact same grow/lift/shadow CSS that `:hover` gives on desktop
+   (see styles.css). This is driven purely by scroll position, no tap
+   needed — it just tracks whatever the user has swiped to.
+   Harmless on desktop: #cardTrack doesn't scroll there (it's
+   `absolute`/`overflow: visible`), so this listener simply never fires.
+   ===================================================================== */
+function updateActiveCard() {
+  const trackRect = track.getBoundingClientRect();
+  const trackCenter = trackRect.left + trackRect.width / 2;
+
+  let closest = null;
+  let closestDist = Infinity;
+  for (let slot = 0; slot < CARD_SLOTS; slot++) {
+    const card = $(`card-${slot}`);
+    if (!card) continue;
+    const rect = card.getBoundingClientRect();
+    const dist = Math.abs(rect.left + rect.width / 2 - trackCenter);
+    if (dist < closestDist) { closestDist = dist; closest = card; }
+    card.classList.remove("is-active");
+  }
+  if (closest) closest.classList.add("is-active");
+}
+
+let activeCardRaf = null;
+track.addEventListener("scroll", () => {
+  if (activeCardRaf) return;
+  activeCardRaf = requestAnimationFrame(() => {
+    updateActiveCard();
+    activeCardRaf = null;
+  });
+}, { passive: true });
+
 function buildPageIndicator() {
   const wrap = $("pageIndicator");
   wrap.innerHTML = "";
@@ -316,6 +352,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   buildCardSlots();
   queueOrder(current).forEach((destIndex, slot) => fillCardSlot(slot, destIndex));
+  updateActiveCard(); // mobile: mark the first card active before any scrolling happens
 
 
   fitTitleFont();

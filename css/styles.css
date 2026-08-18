@@ -72,13 +72,18 @@ html, body { height: 100%; margin: 0; overflow-x: hidden; background: #0B1120; }
               opacity .35s ease;
   background-color: rgba(255,255,255,0.05); /* placeholder while the image loads */
 }
-.dest-card:hover {
+/* `.is-active` is the touch equivalent of `:hover` — on mobile there's
+   no real mouse hover, so JS marks whichever card is centered in the
+   (swipeable) track with this class instead. Both trigger the exact
+   same "grow + lift + shadow" look. */
+.dest-card:hover,
+.dest-card.is-active {
   box-shadow: 0 45px 90px -16px rgba(0,0,0,0.7);
   transform: perspective(900px) rotateY(-1deg) translateY(-14px) scale(1.07);
   z-index: 5;
 }
 
-#cardTrack:has(.dest-card:hover) .dest-card:not(:hover) {
+#cardTrack:has(.dest-card:hover, .dest-card.is-active) .dest-card:not(:hover):not(.is-active) {
   transform: perspective(900px) rotateY(-4deg) translateY(0) scale(0.96);
   opacity: 0.7;
 }
@@ -89,6 +94,15 @@ html, body { height: 100%; margin: 0; overflow-x: hidden; background: #0B1120; }
    with the bar hidden, on every engine (WebKit, Firefox, Chromium). */
 #cardTrack { scrollbar-width: none; -ms-overflow-style: none; }
 #cardTrack::-webkit-scrollbar { display: none; }
+
+/* NOTE on the grow/lift clipping bug: setting `overflow-x: auto` on
+   #cardTrack (index.html, mobile only) makes the browser compute its
+   unset `overflow-y` as `auto` too (CSS spec: a non-visible X/Y forces
+   the other axis out of `visible`) — turning it into a 2D clip box
+   sized to the cards' resting height. The active card's grow+lift
+   then has nowhere to go and gets sliced at the top. Fixed with
+   padding-top on the mobile track (index.html) that's exactly the
+   clearance the transform needs, instead of fighting the clipping. */
 
 
 .dot { width: 5px; height: 5px; border-radius: 999px; background: rgba(255,255,255,0.4); }
