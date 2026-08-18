@@ -127,26 +127,51 @@ function updateCardSlotsSmooth() {
    swipeable mobile card row we fake it: whichever card is currently
    centered in the (horizontally-scrolling) track gets `.is-active`,
    the exact same grow/lift/shadow CSS that `:hover` gives on desktop
-   (see styles.css). This is driven purely by scroll position, no tap
-   needed — it just tracks whatever the user has swiped to.
-   Harmless on desktop: #cardTrack doesn't scroll there (it's
-   `absolute`/`overflow: visible`), so this listener simply never fires.
-   ===================================================================== */
-function updateActiveCard() {
-  const trackRect = track.getBoundingClientRect();
-  const trackCenter = trackRect.left + trackRect.width / 2;
+   (see styles.css, itself gated to `(hover: hover) and (pointer: fine)`
+   so the two mechanisms never compete for the same device).
 
-  let closest = null;
-  let closestDist = Infinity;
-  for (let slot = 0; slot < CARD_SLOTS; slot++) {
-    const card = $(`card-${slot}`);
-    if (!card) continue;
-    const rect = card.getBoundingClientRect();
-    const dist = Math.abs(rect.left + rect.width / 2 - trackCenter);
-    if (dist < closestDist) { closestDist = dist; closest = card; }
-    card.classList.remove("is-active");
+   Only runs on devices WITHOUT a real pointer. On desktop #cardTrack
+   doesn't scroll (it's `absolute`/`overflow: visible`) so this would
+   be a no-op there anyway — but without this guard, the one-time call
+   on page load would still permanently mark card 0 `.is-active`, which
+   *does* render (that CSS isn't hover-gated), showing a stray grown
+   card alongside whatever the mouse is actually hovering. */
+const isTouchDevice = !window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+
+/* First/last card can never scroll to the exact geometric center — the
+   track simply runs out of room to scroll further, so "closest to
+   center" quietly picks their NEIGHBOR instead once you're pinned
+   against either end. That neighbor then shows as active alongside
+   whatever a tap independently triggers. Fix: use the scroll position
+   itself — at either end of the scrollable range, force that end's
+   card active instead of trusting the geometry. */
+function updateActiveCard() {
+  if (!isTouchDevice) return;
+
+  const maxScrollLeft = track.scrollWidth - track.clientWidth;
+  const atStart = track.scrollLeft <= 4;
+  const atEnd = track.scrollLeft >= maxScrollLeft - 4;
+
+  let activeSlot;
+  if (atStart) {
+    activeSlot = 0;
+  } else if (atEnd) {
+    activeSlot = CARD_SLOTS - 1;
+  } else {
+    const trackRect = track.getBoundingClientRect();
+    const trackCenter = trackRect.left + trackRect.width / 2;
+    let closestDist = Infinity;
+    for (let slot = 0; slot < CARD_SLOTS; slot++) {
+      const card = $(`card-${slot}`);
+      if (!card) continue;
+      const dist = Math.abs(card.getBoundingClientRect().left + card.getBoundingClientRect().width / 2 - trackCenter);
+      if (dist < closestDist) { closestDist = dist; activeSlot = slot; }
+    }
   }
-  if (closest) closest.classList.add("is-active");
+
+  for (let slot = 0; slot < CARD_SLOTS; slot++) {
+    $(`card-${slot}`)?.classList.toggle("is-active", slot === activeSlot);
+  }
 }
 
 let activeCardRaf = null;

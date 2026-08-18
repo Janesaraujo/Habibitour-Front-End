@@ -75,17 +75,40 @@ html, body { height: 100%; margin: 0; overflow-x: hidden; background: #0B1120; }
 /* `.is-active` is the touch equivalent of `:hover` — on mobile there's
    no real mouse hover, so JS marks whichever card is centered in the
    (swipeable) track with this class instead. Both trigger the exact
-   same "grow + lift + shadow" look. */
-.dest-card:hover,
+   same "grow + lift + shadow" look.
+
+   `:hover` itself is scoped to devices that have a REAL pointer (mouse
+   or trackpad). Without this, tapping a card on a touchscreen leaves
+   it permanently "hovered" — touch has no equivalent of moving the
+   mouse away to clear the state — so it would stay grown forever,
+   often alongside whichever card `.is-active` marks from scrolling,
+   showing two "chosen" cards at once. */
+@media (hover: hover) and (pointer: fine) {
+  .dest-card:hover {
+    box-shadow: 0 45px 90px -16px rgba(0,0,0,0.7);
+    transform: perspective(900px) rotateY(-1deg) translateY(-14px) scale(1.07);
+    z-index: 5;
+  }
+}
 .dest-card.is-active {
   box-shadow: 0 45px 90px -16px rgba(0,0,0,0.7);
   transform: perspective(900px) rotateY(-1deg) translateY(-14px) scale(1.07);
   z-index: 5;
 }
 
-#cardTrack:has(.dest-card:hover, .dest-card.is-active) .dest-card:not(:hover):not(.is-active) {
+/* Split the same way as the grow rule above: touch devices only ever
+   consider `.is-active` here, real-pointer devices only `:hover` —
+   each gated exactly like its own grow rule, so the two mechanisms
+   can never both be "live" on the same device at once. */
+#cardTrack:has(.dest-card.is-active) .dest-card:not(.is-active) {
   transform: perspective(900px) rotateY(-4deg) translateY(0) scale(0.96);
   opacity: 0.7;
+}
+@media (hover: hover) and (pointer: fine) {
+  #cardTrack:has(.dest-card:hover) .dest-card:not(:hover) {
+    transform: perspective(900px) rotateY(-4deg) translateY(0) scale(0.96);
+    opacity: 0.7;
+  }
 }
 
 /* Mobile card row is a native horizontal-scroll carousel (see index.html);
