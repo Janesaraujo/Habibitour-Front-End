@@ -167,13 +167,13 @@ For development, you can use the **Live Server** extension in VS Code to automat
 Take a look at the live website and explore the full experience:
 
 <p align="center">
-  <a href="YOUR_VERCEL_URL">
+  <a href="https://habibitour-front-end.vercel.app/">
     <img src="assets/preview.gif" alt="Habibi Tour preview" />
   </a>
 </p>
 
 <p align="center">
-  🔗 <strong><a href="YOUR_VERCEL_URL">Live Preview →</a></strong>
+  🔗 <strong><a href="https://habibitour-front-end.vercel.app/">Live Preview →</a></strong>
 </p>
 
 ## 👤 Author
