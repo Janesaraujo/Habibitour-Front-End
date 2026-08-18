@@ -59,7 +59,7 @@ function buildCardSlots() {
   track.innerHTML = "";
   for (let slot = 0; slot < CARD_SLOTS; slot++) {
     const el = document.createElement("div");
-    el.className = "dest-card shrink-0 relative w-[150px] md:w-[240px] 2xl:w-[330px] h-[230px] md:h-[350px] 2xl:h-[470px] rounded-2xl 2xl:rounded-3xl overflow-hidden cursor-pointer shadow-2xl shadow-black/40";
+    el.className = "dest-card shrink-0 snap-center relative w-[150px] md:w-[240px] 2xl:w-[330px] h-[230px] md:h-[350px] 2xl:h-[470px] rounded-2xl 2xl:rounded-3xl overflow-hidden cursor-pointer shadow-2xl shadow-black/40";
     el.id = `card-${slot}`;
     el.innerHTML = `
       <img id="card-img-${slot}" src="" alt="" class="w-full h-full object-cover" />
@@ -339,7 +339,7 @@ window.addEventListener("DOMContentLoaded", () => {
       },
       0.5
     )
-    .fromTo("#hero .absolute.bottom-9", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.6 }, 1.1);
+    .fromTo("#bottomControls", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.6 }, 1.1);
 });
 
 

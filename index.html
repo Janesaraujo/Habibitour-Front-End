@@ -27,7 +27,7 @@
      created ONCE and never removed or recreated. Only the inner content
      (background image, title, description, each card's photo/name) is
      updated on every navigation. This avoids any layout "flash". -->
-<section id="hero" class="relative w-full h-screen">
+<section id="hero" class="relative w-full min-h-screen md:h-screen">
 
   <div id="bgFallback"></div>
   <div id="bgA"></div>
@@ -67,8 +67,11 @@
     <!-- 01–04 numbers injected via JS -->
   </div>
 
-  <!-- ===== Main content (left-aligned text) ===== -->
-  <div class="relative z-20 h-full flex flex-col justify-center px-8 md:px-24 2xl:px-32 max-w-2xl 2xl:max-w-[940px]">
+  <!-- ===== Main content (left-aligned text) =====
+       On mobile this is a normal in-flow block (not h-full/centered) so
+       it only takes the height its content needs, leaving room for the
+       card row below it. md+ restores the original centered layout. -->
+  <div class="relative z-20 md:h-full flex flex-col justify-start md:justify-center px-8 md:px-24 2xl:px-32 max-w-2xl 2xl:max-w-[940px] pt-28 pb-10 md:pt-0 md:pb-0">
     <p id="eyebrow" class="text-sand text-xs 2xl:text-sm tracking-[0.35em] uppercase mb-4 2xl:mb-6">United Arab Emirates</p>
 
     <h1 id="title" class="text-[clamp(2.25rem,15vw,3.75rem)] md:text-[clamp(2.75rem,6.5vw,5rem)] 2xl:text-[clamp(3.5rem,6.5vw,7rem)] leading-[0.9] font-extrabold uppercase tracking-tight">
@@ -89,13 +92,21 @@
     </button>
   </div>
 
-  <!-- ===== Card slider (3 FIXED slots — never created/removed) ===== -->
-  <div id="cardTrack" class="absolute z-20 right-4 md:right-10 2xl:right-14 top-1/2 -translate-y-1/2 flex gap-5 2xl:gap-7 items-end">
+  <!-- ===== Card slider (3 FIXED slots — never created/removed) =====
+       Mobile: normal in-flow block, right below the text — a
+       horizontally swipeable row (native scroll + snap), so it never
+       fights the text for space. md+: back to absolute, floating
+       beside the text, exactly as before. -->
+  <div id="cardTrack" class="relative md:absolute z-20 md:right-10 2xl:right-14 md:top-1/2 md:-translate-y-1/2 flex gap-5 2xl:gap-7 items-end overflow-x-auto md:overflow-visible snap-x snap-mandatory md:snap-none px-8 md:px-0 pb-6 md:pb-0">
     <!-- Slots 0, 1, 2 — generated once by JS on load -->
   </div>
 
-  <!-- ===== Bottom controls (liquid glass) ===== -->
-  <div class="liquid-glass absolute z-20 bottom-9 2xl:bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-5 2xl:gap-7 rounded-full pl-2 pr-2 2xl:pl-3 2xl:pr-3 py-2 2xl:py-3">
+  <!-- ===== Bottom controls (liquid glass) =====
+       Mobile: normal in-flow block, centered under the card row (same
+       fix as the card track — an absolute bottom-9 here would collide
+       with the row on short/narrow screens once it's in-flow). md+:
+       back to floating over the hero, exactly as before. -->
+  <div id="bottomControls" class="liquid-glass relative md:absolute z-20 md:bottom-9 2xl:bottom-12 mx-auto md:left-1/2 md:-translate-x-1/2 w-fit flex items-center gap-5 2xl:gap-7 rounded-full pl-2 pr-2 2xl:pl-3 2xl:pr-3 py-2 2xl:py-3 mb-10 md:mb-0">
     <button id="prevBtn" aria-label="Previous destination" class="arrow-btn">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <polyline points="15 18 9 12 15 6"/>

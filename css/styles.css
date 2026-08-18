@@ -1,5 +1,12 @@
 * { font-family: 'Plus Jakarta Sans', sans-serif; }
-html, body { height: 100%; margin: 0; overflow: hidden; background: #0B1120; }
+html, body { height: 100%; margin: 0; overflow-x: hidden; background: #0B1120; }
+/* Desktop/tablet: #hero is a fixed h-screen (see index.html), so the
+   page never scrolls — matches the original "one cinematic frame"
+   feel. Mobile: #hero grows past 100vh to fit the stacked text + card
+   row, so the page needs to actually be able to scroll to reach it. */
+@media (min-width: 768px) {
+  html, body { overflow-y: hidden; }
+}
 
 
 #bgFallback {
@@ -75,6 +82,13 @@ html, body { height: 100%; margin: 0; overflow: hidden; background: #0B1120; }
   transform: perspective(900px) rotateY(-4deg) translateY(0) scale(0.96);
   opacity: 0.7;
 }
+
+/* Mobile card row is a native horizontal-scroll carousel (see index.html);
+   hide its scrollbar so it reads as a deliberate swipe gesture instead of
+   a raw scrollable list. Purely cosmetic — scrolling itself still works
+   with the bar hidden, on every engine (WebKit, Firefox, Chromium). */
+#cardTrack { scrollbar-width: none; -ms-overflow-style: none; }
+#cardTrack::-webkit-scrollbar { display: none; }
 
 
 .dot { width: 5px; height: 5px; border-radius: 999px; background: rgba(255,255,255,0.4); }
